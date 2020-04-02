@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>简易聊天室</title>
+  <link rel="stylesheet" href="https://cdn.bootcss.com/twitter-bootstrap/4.4.1/css/bootstrap.min.css" />
+  <style>
+    .self {
+      padding: 0 10px;
+      background-color: orange;
+      border-radius: 10px;
+    }
+    .other {
+      padding: 0 10px;
+      background-color: pink;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <%- include('./commons/navbar') %>
+
+  <div class="container my-5">
+    <h1>聊天室</h1>
+
+    <div class="row">
+      <div class="col-md-6 mx-auto">
+        <div class="mb-4" id="message"
+          style="height: 300px; overflow-y: auto; border: 1px solid #000;border-radius: 5px; padding: 10px;">
+          <!-- <div class="my-4  mr-2 d-flex">
+            <div class="mr-2">
+              <small class="text-black-50">张三：</small>
+            </div>
+            <div>
+              hello
+            </div>
+          </div> -->
+
+          <!-- <div class="my-4 mr-2 d-flex justify-content-end">
+            <div class="mr-2">
+              <small class="text-black-50">我：</small>
+            </div>
+            <div>
+              hello
+            </div>
+          </div> -->
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6 mx-auto d-flex">
+        <input id="msgVal" type="text" class="form-control mr-2">
+        <button id="btn" class="btn btn-primary">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.4.1/js/bootstrap.min.js"></script>
+  <script src="/lib/socket.io.js"></script>
+  <script>
+    $(function(){
+      // 建立 socket.io 的连接
+      const socket = io('http://localhost:3000')
+
+      // 触发 服务器的 setName 方法，传递当前用户的用户名过去
+      socket.emit('setName', '<%= username %>')
+
+      // 点击按钮发送消息
+      $('#btn').click(function(){
+        send()
+      })
+
+      // 回车直接发送
+      $('#msgVal').change(function() {
+        send()
+      })
+
+      // 发送信息
+      function send() {
+        var value = $('#msgVal').val().trim()  
+        $('#msgVal').val("")
+        if(!value) return   // 如果 输入框中没有内容，直接 终止
+        socket.emit('userMessage', {message: value})
+      }
+
+      // 监听 服务端 发送来的信息
+      socket.on('message', data => {
+        console.log(data)
+        if(data.username === '<%= username %>'){
+          $('#message').append(`
+            <div class="my-4 mr-2 d-flex justify-content-end">
+              <div class="self">
+                ${data.message}
+              </div>
+              <div class="mr-2">
+              <small class="text-black-50"> : 我</small>
+            </div>
+            </div>
+          `)
+        }else{
+          $('#message').append(`
+            <div class="my-4  mr-2 d-flex">
+              <div class="mr-2">
+                <small class="text-black-50">${data.username}:</small>
+              </div>
+              <div class="other">
+                ${data.message}
+              </div>
+            </div>
+          `)
+        }
+
+        // 聊天信息自动置底
+        $('#message').stop().animate({
+          scrollTop: $('#message').height() + $('#message').scrollTop()
+        }, 'slow')
+      })
+    })
+
+    
+    
+    
+    
+  </script>
+</body>
+
+</html>
