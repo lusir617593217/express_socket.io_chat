@@ -1,5 +1,7 @@
 // 引入 express 模块
 const express = require('express')
+// 引入 dotenv,并配置
+require('dotenv').config()
 // 引入 express-async-errors 模块
 require('express-async-errors')
 // 引入 express-session 
